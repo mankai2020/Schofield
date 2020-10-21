@@ -33,12 +33,12 @@ disp('   Constructing thickness');
 md.geometry.thickness=md.geometry.surface-md.geometry.base;
 
 %ensure hydrostatic equilibrium on ice shelf: 
-di=md.materials.rho_ice/md.materials.rho_water;
+%di=md.materials.rho_ice/md.materials.rho_water;
 
 %apply a flotation criterion on the precedingly defined nodes and
 %redefine base and thickness accordingly
-md.geometry.thickness(pos_float)=1/(1-di)*md.geometry.surface(pos_float);
-md.geometry.base(pos_float)=md.geometry.surface(pos_float)-md.geometry.thickness(pos_float);
+%md.geometry.thickness(pos_float)=1/(1-di)*md.geometry.surface(pos_float);
+%md.geometry.base(pos_float)=md.geometry.surface(pos_float)-md.geometry.thickness(pos_float);
 md.geometry.hydrostatic_ratio=ones(md.mesh.numberofvertices,1); %For Dakota
 
 %Set min thickness to 1 meter
