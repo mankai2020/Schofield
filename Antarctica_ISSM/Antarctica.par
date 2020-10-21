@@ -1,5 +1,5 @@
 % Parameters to change/Try
-friction_coefficient = 20; % default [10]
+friction_coefficient = 10; % default [10]
 
 %Name and Coordinate system
 md.miscellaneous.name='Antarctica';
@@ -97,7 +97,7 @@ md.friction.q=ones(md.mesh.numberofelements,1);
 
 %no friction applied on floating ice
 md.friction.coefficient(pos_float)=0;
-md.groundingline.migration='SubelementMigration';
+%md.groundingline.migration='SubelementMigration';
 
 md.inversion=m1qn3inversion();
 md.inversion.vx_obs=md.initialization.vx;
@@ -105,10 +105,10 @@ md.inversion.vy_obs=md.initialization.vy;
 md.inversion.vel_obs=md.initialization.vel;
 
 disp('   Set boundary conditions');
-md=SetMarineIceSheetBC(md);
-%md=SetIceShelfBC(md);
-md.basalforcings.floatingice_melting_rate = zeros(md.mesh.numberofvertices,1);
-md.basalforcings.groundedice_melting_rate = 10*ones(md.mesh.numberofvertices,1);
+%md=SetMarineIceSheetBC(md);
+md=SetIceShelfBC(md);
+md.basalforcings.floatingice_melting_rate = 10*ones(md.mesh.numberofvertices,1);
+md.basalforcings.groundedice_melting_rate = zeros(md.mesh.numberofvertices,1);
 md.calving.calvingrate=10*ones(md.mesh.numberofvertices,1);
 %md.thermal.spctemperature                 = md.initialization.temperature;
 %md.thermal.spctemperature		  = NaN*ones(md.mesh.numberofvertices,1);
