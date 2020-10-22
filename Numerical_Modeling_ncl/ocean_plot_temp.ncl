@@ -2,12 +2,12 @@ begin
 
 	sfile=systemfunc("ls /work1/mankai/ORAS/thetao*");
 	f=addfiles(sfile,"r");
-	ListSetType(f, "join")
+	ListSetType(f, "join");
 	
-	;thetao=f[:]->thetao(7,0:36,:,327:339,:);
-	thetao=f[:]->thetao(:,:,:,:,:);
-	printVarSummary(thetao);
-	thetao_zon=dim_avg(dim_avg(thetao));
+	thetao=f[:]->thetao(:,1,0:36,:,327:339);
+	;thetao=f[:]->thetao(:,:,:,:,:);
+	;printVarSummary(thetao);
+	thetao_zon=dim_avg(dim_avg_n(thetao,0));
 	thetao_zon!0="depth";
 	thetao_zon!1="lat";
 	thetao_zon&depth=thetao&depth(0:36);
@@ -34,7 +34,7 @@ begin
 	 res@gsnMaximize   = True            ; Maximize plot in frame
 	 res@cnFillOn      = True            ; Turn on contour fill
 	 res@cnFillPalette = "BlAqGrYeOrRe"
-	 res@tiMainString  = "Temperature_Aug"   ; Main title
+	 res@tiMainString  = "Temperature_Feb"   ; Main title
 	 
 	 ;res@gsnYAxisIrregular2Linear = True ; converts irreg depth to linear
 	 res@gsnYAxisIrregular2Log = True    ; Convert Y axis to logarithmic

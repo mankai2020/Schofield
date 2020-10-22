@@ -2,9 +2,10 @@ begin
 
 	sfile=systemfunc("ls /work1/mankai/ORAS/so*");
 	f=addfiles(sfile,"r");
+	ListSetType(f, "join");
 	
-	so=f[:]->so(50,0:36,:,327:339);
-	so_zon=dim_avg(so);
+	so=f[:]->so(:,1,0:36,:,327:339);
+	so_zon=dim_avg(dim_avg_n(so,0));
 	so_zon!0="depth";
 	so_zon!1="lat";
 	so_zon&depth=so&depth(0:36);
@@ -12,9 +13,6 @@ begin
 	print(so&lon)
 	printVarSummary(so);
 	printVarSummary(so_zon);
-	
-	so1=f[1]->so(7,0:36,:,327:339);
-	printVarSummary(so1);
 	
 	;===========================
 	; plot parameters
@@ -34,7 +32,7 @@ begin
 	 res@gsnMaximize   = True            ; Maximize plot in frame
 	 res@cnFillOn      = True            ; Turn on contour fill
 	 res@cnFillPalette = "BlAqGrYeOrRe"
-	 res@tiMainString  = "Salinity_Aug"   ; Main title
+	 res@tiMainString  = "Salinity_Feb"   ; Main title
 	 
 	 ;res@gsnYAxisIrregular2Linear = True ; converts irreg depth to linear
 	 res@gsnYAxisIrregular2Log = True    ; Convert Y axis to logarithmic
