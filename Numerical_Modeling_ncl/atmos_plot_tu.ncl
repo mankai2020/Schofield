@@ -38,13 +38,9 @@ begin
 	;===========================
 	
 	 wks_type = "png"
-	 ;wks_type@wkWidth = 800
-	 ;wks_type@wkHeight = 500
-
-	 wks   = gsn_open_wks (wks_type, "t_u_zon_Jan" )         ; send graphics to PNG file
+	 wks   = gsn_open_wks (wks_type, "t_u_zon_Jan" )
 
 	 res               = True            ; Plot mods desired
-	 
 	 res@vpWidthF = 3
 	 res@vpHeightF = 1.8
 	 
@@ -81,16 +77,18 @@ begin
 	 	;===========================
 	; plot parameters
 	;===========================
+
+	 wks2_type = "png"
+	 wks2   = gsn_open_wks (wks2_type, "pt_zon_Jan" )
 	
 	 res2               = True            ; Plot mods desired
-	 
 	 res2@vpWidthF = 3
 	 res2@vpHeightF = 1.8
 	 	 
 	 res2@gsnMaximize   = True            ; Maximize plot in frame
 	 res2@cnFillOn      = True            ; Turn on contour fill
 	 res2@cnFillPalette = "BlAqGrYeOrRe"
-	 res2@tiMainString  = "Potential Temperature"  ; Main title
+	 res2@tiMainString  = "Potential Temperature (Jan)"  ; Main title
 	 res2@gsnRightString   = "K"    
 	 res2@gsnLeftString    = ""
 	 res2@gsnCenterString  = ""
@@ -100,6 +98,6 @@ begin
 	 ;res2@gsnYAxisIrregular2Log = True    ; Convert Y axis to logarithmic
 	 res2@trYReverse    		      = True ; reverse y axis
 	 
-	 plot = gsn_csm_contour(wks, theta_zon, res2) 
+	 plot = gsn_csm_contour(wks2, theta_zon, res2) 
 	 
 end
