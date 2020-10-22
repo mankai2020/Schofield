@@ -4,8 +4,9 @@ begin
 	f=addfiles(sfile,"r");
 	ListSetType(f, "join")
 	
-	thetao=f[:]->thetao(7,0:36,:,327:339,:);
-	thetao=f[:]->thetao(0,:,:,:);
+	;thetao=f[:]->thetao(7,0:36,:,327:339,:);
+	thetao=f[:]->thetao(:,:,:,:,:);
+	printVarSummary(thetao);
 	thetao_zon=dim_avg(dim_avg(thetao));
 	thetao_zon!0="depth";
 	thetao_zon!1="lat";

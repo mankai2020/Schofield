@@ -4,7 +4,6 @@ begin
 	f=addfiles(sfile,"r");
 	
 	so=f[:]->so(50,0:36,:,327:339);
-	;so=f[:]->so(0,:,:,:);
 	so_zon=dim_avg(so);
 	so_zon!0="depth";
 	so_zon!1="lat";
