@@ -36,7 +36,7 @@ md.mask.ice_levelset=-1*ones(md.mesh.numberofvertices,1);%ice is present when ne
 md = parameterize(md,'./Antarctica.par');
 
 % Extrude
-md = extrude(md,9,1);
+md = extrude(md,3,1);
 
 % Use a MacAyeal flow model
 %md = setflowequation(md,'HO','all');
@@ -61,10 +61,10 @@ md.transient.isgroundingline=0;
 md.transient.ismovingfront=0;
 md.transient.isthermal=1;
 
-md.timestepping.time_step=1;
+md.timestepping.time_step=10;
 %md.timestepping.start_time=100;
 md.settings.output_frequency=10;
-md.timestepping.final_time=100;
+md.timestepping.final_time=10000;
 %md.transient.requested_outputs={'default','IceVolume','IceVolumeAboveFloatation'};
 md.transient.requested_outputs={'default','IceVolume'};
 
