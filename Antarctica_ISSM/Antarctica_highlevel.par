@@ -1,0 +1,122 @@
+% Parameters to change/Try
+friction_coefficient = 10; % default [10]
+
+%Name and Coordinate system
+md.miscellaneous.name='Antarctica';
+md.mesh.epsg=3031;
+
+%NetCdf Loading
+disp('   Loading SeaRISE data from NetCDF');
+ncdata='./Antarctica.nc';
+monthlydata='./MonthlyData.nc'
+x1    = ncread(ncdata,'x1');
+y1    = ncread(ncdata,'y1');
+usrf  = ncread(ncdata,'usrf');
+topg  = ncread(ncdata,'topg');
+temp  = ncread(ncdata,'presartm');
+prcp  = ncread(ncdata,'prcp');
+monthlytemp = ncread(monthlydata,'presartm');
+monthlytemp = permute(monthlytemp,[2 3 1]);
+monthlyprcp   = ncread(monthlydata,'prcp');
+monthlyprcp = permute(monthlyprcp,[2 3 1]);
+
+%Geometry
+disp('   Interpolating surface and ice base');
+md.geometry.base    = InterpFromGridToMesh(x1,y1,topg,md.mesh.x,md.mesh.y,0);
+pos_low=find(md.geometry.surface<1000);
+md.geometry.surface(pos_low)=1000;
+md.geometry.surface = InterpFromGridToMesh(x1,y1,usrf,md.mesh.x,md.mesh.y,0);
+pos_float=find(md.mask.groundedice_levelset<0);
+%pos_lnd=find(md.mask.groundedice_levelset>0);
+%md.geometry.surface(pos_lnd) = md.geometry.surface(pos_lnd) +10;
+clear usrf, topg;
+
+disp('   Constructing thickness');
+md.geometry.thickness=md.geometry.surface-md.geometry.base;
+
+%ensure hydrostatic equilibrium on ice shelf: 
+%di=md.materials.rho_ice/md.materials.rho_water;
+
+%apply a flotation criterion on the precedingly defined nodes and
+%redefine base and thickness accordingly
+%md.geometry.thickness(pos_float)=1/(1-di)*md.geometry.surface(pos_float);
+%md.geometry.base(pos_float)=md.geometry.surface(pos_float)-md.geometry.thickness(pos_float);
+md.geometry.hydrostatic_ratio=ones(md.mesh.numberofvertices,1); %For Dakota
+
+%Set min thickness to 1 meter
+pos0=find(md.geometry.thickness<=1);
+md.geometry.thickness(pos0)=1;
+md.geometry.surface=md.geometry.base+md.geometry.thickness;
+md.geometry.bed=md.geometry.base;
+md.geometry.bed(pos_float)=md.geometry.base(pos_float)-1000;
+
+%Initialization parameters
+disp('   Interpolating temperatures');
+md.initialization.temperature=InterpFromGridToMesh(x1,y1,temp,md.mesh.x,md.mesh.y,0);
+
+disp('   Set observed velocities')
+md.initialization.vx=zeros(md.mesh.numberofvertices,1);
+md.initialization.vy=zeros(md.mesh.numberofvertices,1);
+md.initialization.vz=zeros(md.mesh.numberofvertices,1);
+md.initialization.vel=zeros(md.mesh.numberofvertices,1);
+%md.initialization.vel=sqrt(md.initialization.vx.^2+md.initialization.vy.^2+md.initialization.vz.^2);
+
+disp('   Set Pressure');
+md.initialization.pressure=md.materials.rho_ice*md.constants.g*md.geometry.thickness;
+
+disp('   Construct ice rheological properties');
+md.materials.rheology_n=3*ones(md.mesh.numberofelements,1);
+md.materials.rheology_B=paterson(md.initialization.temperature);
+
+%Forcings
+disp('   Creating & Interpolating surface mass balance');
+md.smb=SMBpdd();
+md.smb.s0p=md.geometry.surface;
+md.smb.s0t=md.geometry.surface;
+md.smb.s0p(find(md.smb.s0p<0))=0;
+md.smb.s0t(find(md.smb.s0t<0))=0;
+
+newtemp = zeros(md.mesh.numberofvertices,12);
+for i = 1:12
+	newtemp(:,i)=InterpFromGridToMesh(x1,y1,monthlytemp(:,:,i),md.mesh.x,md.mesh.y,0);
+end
+md.smb.monthlytemperatures = newtemp;
+newprcp = zeros(md.mesh.numberofvertices,12);
+for i = 1:12
+	newprcp(:,i)=InterpFromGridToMesh(x1,y1,monthlyprcp(:,:,i),md.mesh.x,md.mesh.y,0);
+end
+md.smb.precipitation = newprcp;
+clear prcp presartm newtemp newprcp;
+
+disp('   Set geothermal heat flux');
+md.basalforcings.geothermalflux=zeros(md.mesh.numberofvertices,1);
+
+%Friction and inversion set up
+disp('   Construct basal friction parameters');
+md.friction.coefficient=friction_coefficient*ones(md.mesh.numberofvertices,1);
+md.friction.p=ones(md.mesh.numberofelements,1);
+md.friction.q=ones(md.mesh.numberofelements,1);
+
+%no friction applied on floating ice
+md.friction.coefficient(pos_float)=0;
+%md.groundingline.migration='SubelementMigration';
+
+md.inversion=m1qn3inversion();
+md.inversion.vx_obs=md.initialization.vx;
+md.inversion.vy_obs=md.initialization.vy;
+md.inversion.vel_obs=md.initialization.vel;
+
+disp('   Set boundary conditions');
+%md=SetMarineIceSheetBC(md);
+md=SetIceShelfBC(md);
+md.basalforcings.floatingice_melting_rate = 20*ones(md.mesh.numberofvertices,1);
+md.basalforcings.groundedice_melting_rate = zeros(md.mesh.numberofvertices,1);
+md.calving.calvingrate=zeros(md.mesh.numberofvertices,1);
+%md.thermal.spctemperature                 = md.initialization.temperature;
+%md.thermal.spctemperature		  = NaN*ones(md.mesh.numberofvertices,1);
+md.thermal.spctemperature                 = md.initialization.temperature;
+md.masstransport.spcthickness             = NaN*ones(md.mesh.numberofvertices,1);
+
+md.stressbalance.spcvx=NaN*ones(md.mesh.numberofvertices,1);
+md.stressbalance.spcvy=NaN*ones(md.mesh.numberofvertices,1);
+md.stressbalance.spcvz=NaN*ones(md.mesh.numberofvertices,1);
