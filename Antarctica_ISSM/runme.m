@@ -11,26 +11,26 @@ err = 8;
 % Gnerate an inital mesh
 md = bamg(model,'domain',domain,'hmax',hinit);
 
-% Load lndmask
-antarData = './Antarctica.nc';
+% % Load lndmask
+% antarData = './Antarctica.nc';
 
-% set mask
-%read thickness mask from SeaRISE
-x1=double(ncread(antarData,'x1'));
-y1=double(ncread(antarData,'y1'));
-thkmask=double(ncread(antarData,'mask'));
+% % set mask
+% %read thickness mask from SeaRISE
+% x1=double(ncread(antarData,'x1'));
+% y1=double(ncread(antarData,'y1'));
+% thkmask=double(ncread(antarData,'mask'));
 
-%interpolate onto our mesh vertices
-%groundedice=double(InterpFromGridToMesh(x1,y1,flipud(thkmask'),md.mesh.x,md.mesh.y,0));
-groundedice=double(InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0));
-%groundedice=InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0);
-groundedice(groundedice>0)=1;
-groundedice(groundedice<=0)=-1;
-clear thkmask;
+% %interpolate onto our mesh vertices
+% %groundedice=double(InterpFromGridToMesh(x1,y1,flipud(thkmask'),md.mesh.x,md.mesh.y,0));
+% groundedice=double(InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0));
+% %groundedice=InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0);
+% groundedice(groundedice>0)=1;
+% groundedice(groundedice<=0)=-1;
+% clear thkmask;
 
-%fill in the md.mask structure
-md.mask.groundedice_levelset=groundedice; %ice is grounded for mask equal one
-md.mask.ice_levelset=-1*ones(md.mesh.numberofvertices,1);%ice is present when negatvie
+% %fill in the md.mask structure
+% md.mask.groundedice_levelset=groundedice; %ice is grounded for mask equal one
+% md.mask.ice_levelset=-1*ones(md.mesh.numberofvertices,1);%ice is present when negatvie
 
 % Parameterization
 md = parameterize(md,'./Antarctica.par');

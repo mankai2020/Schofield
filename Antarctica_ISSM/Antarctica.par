@@ -24,9 +24,10 @@ monthlyprcp = permute(monthlyprcp,[2 3 1]);
 disp('   Interpolating surface and ice base');
 md.geometry.base    = InterpFromGridToMesh(x1,y1,topg,md.mesh.x,md.mesh.y,0);
 md.geometry.surface = InterpFromGridToMesh(x1,y1,usrf,md.mesh.x,md.mesh.y,0);
-pos_float=find(md.mask.groundedice_levelset<0);
-%pos_lnd=find(md.mask.groundedice_levelset>0);
-%md.geometry.surface(pos_lnd) = md.geometry.surface(pos_lnd) +10;
+pos_float=find(md.geometry.base==0);
+md.mask.groundedice_levelset(pos_float)=-1;
+pos_lnd=find(md.geometry.base>0);
+md.mask.groundedice_levelset(pos_lnd)=1;
 clear usrf, topg;
 
 disp('   Constructing thickness');
