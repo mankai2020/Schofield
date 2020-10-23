@@ -9,7 +9,12 @@ begin
 	ListSetType(f, "join");
 	so=f[:]->so(:,1,0:36,:,327:339);
 	so_avg=dim_avg_n(so,0);
-	;printVarSummary(so_avg);
+	so_zon=dim_avg(dim_avg_n(so,0));
+	so_zon!0="depth";
+	so_zon!1="lat";
+	so_zon&depth=so&depth(0:36);
+	so_zon&lat=so&lat;
+	printVarSummary(so_zon);
 	;print(dim_avg(dim_avg(so_avg)));
 	
 	sfile2=systemfunc("ls /work1/mankai/ORAS/thetao*");
@@ -17,6 +22,11 @@ begin
 	ListSetType(f2, "join");
 	thetao=f2[:]->thetao(:,1,0:36,:,327:339);
 	thetao_avg=dim_avg_n(thetao,0);
+	thetao_zon=dim_avg(dim_avg_n(thetao,0));
+	thetao_zon!0="depth";
+	thetao_zon!1="lat";
+	thetao_zon&depth=thetao&depth(0:36);
+	thetao_zon&lat=thetao&lat;
 	;printVarSummary(thetao_avg);
 	
 	;===========================
@@ -37,14 +47,16 @@ begin
 	density_zon!1="lat";
 	density_zon&depth=so&depth(0:36);
 	density_zon&lat=so&lat;
-	print(max(density_zon));
-	print(min(density_zon));
+	;print(max(density_zon));
+	;print(min(density_zon));
 	;density_zon@missing_value=density@_FillValue;
-	printVarSummary(density);
+	;printVarSummary(density);
 	printVarSummary(density_zon);
 	;print(dim_avg(dim_avg(density_zon)));
 	;print(dim_avg(density_zon));
 	;print(density_zon);	
+	so_zon=so_zon-thetao_zon;
+	;density_zon=density_zon*100;
 	
 	;===========================
 	; plot parameters
@@ -70,7 +82,8 @@ begin
 	 res@tmYLValues            = (/10,100,1000,3000/)
 	 res@tmYLLabels            = "" + res@tmYLValues
 
-	 plot = gsn_csm_contour(wks, density_zon, res ) 
+	 ;plot = gsn_csm_contour(wks, density_zon, res ) 
+	 plot = gsn_csm_contour(wks, so_zon, res )
 	 
 	 ;res@tiMainString          = "Logarithmic axis"
 	 ;res@gsnYAxisIrregular2Log = True    ; Convert Y axis to logarithmic
