@@ -37,9 +37,11 @@ begin
 	density_zon!1="lat";
 	density_zon&depth=so&depth(0:36);
 	density_zon&lat=so&lat;
+	print(max(density_zon));
+	print(min(density_zon));
 	;density_zon@missing_value=density@_FillValue;
-	;printVarSummary(density);
-	;printVarSummary(density_zon);
+	printVarSummary(density);
+	printVarSummary(density_zon);
 	;print(dim_avg(dim_avg(density_zon)));
 	;print(dim_avg(density_zon));
 	;print(density_zon);	
