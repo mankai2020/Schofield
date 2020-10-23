@@ -106,8 +106,8 @@ md.inversion.vy_obs=md.initialization.vy;
 md.inversion.vel_obs=md.initialization.vel;
 
 disp('   Set boundary conditions');
-%md=SetMarineIceSheetBC(md);
-md=SetIceShelfBC(md);
+md=SetMarineIceSheetBC(md);
+%md=SetIceShelfBC(md);
 md.basalforcings.floatingice_melting_rate = 20*ones(md.mesh.numberofvertices,1);
 md.basalforcings.groundedice_melting_rate = zeros(md.mesh.numberofvertices,1);
 md.calving.calvingrate=zeros(md.mesh.numberofvertices,1);
