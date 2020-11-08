@@ -4,8 +4,8 @@ domain = ['./DomainOutline.exp'];
 %domain = ['./refinement.exp']
 hinit = 50000;
 hmax = 200000;
-hmin = 25000;
-gradation = 1.7;
+hmin = 5000;
+gradation = 100;
 err = 8;
 
 % Gnerate an inital mesh
@@ -14,11 +14,22 @@ md = bamg(model,'domain',domain,'hmax',hinit);
 % Load lndmask
 antarData = './Antarctica.nc';
 
+x1    = ncread(antarData,'x1');
+y1    = ncread(antarData,'y1');
+topg  = ncread(antarData,'topg');
+topg(find(topg==0))=nan;
+
+md.geometry.base    = InterpFromGridToMesh(x1,y1,topg,md.mesh.x,md.mesh.y,0);
+
+% Adapt the mesh to minimize error in velocity interpolation
+md=bamg(md,'hmax',hmax,'hmin',hmin,'gradation',gradation,'field',md.geometry.base,'err',err);
+
 % set mask
 %read thickness mask from SeaRISE
 x1=double(ncread(antarData,'x1'));
 y1=double(ncread(antarData,'y1'));
 thkmask=double(ncread(antarData,'mask'));
+thkmask(find(thkmask==0))=nan;
 
 %interpolate onto our mesh vertices
 %groundedice=double(InterpFromGridToMesh(x1,y1,flipud(thkmask'),md.mesh.x,md.mesh.y,0));
