@@ -4,7 +4,7 @@ domain = ['./DomainOutline.exp'];
 %domain = ['./refinement.exp']
 hinit = 50000;
 hmax = 200000;
-hmin = 10000;
+hmin = 5000;
 gradation = 100;
 err = 8;
 
@@ -12,26 +12,29 @@ err = 8;
 md = bamg(model,'domain',domain,'hmax',hinit);
 
 % Load lndmask
-antarData = './Antarctica_new.nc';
+antarData = './Antarctica.nc';
 
 x1    = ncread(antarData,'x1');
 y1    = ncread(antarData,'y1');
-topg  = ncread(antarData,'topg_smooth');
+topg  = ncread(antarData,'topg');
 topg(find(topg==0))=nan;
-thkmask=ncread(antarData,'mask');
-thkmask(find(thkmask==0))=nan;
 
 md.geometry.base    = InterpFromGridToMesh(x1,y1,topg,md.mesh.x,md.mesh.y,0);
 
 % Adapt the mesh to minimize error in velocity interpolation
 md=bamg(md,'hmax',hmax,'hmin',hmin,'gradation',gradation,'field',md.geometry.base,'err',err);
 
-md.geometry.base    = InterpFromGridToMesh(x1,y1,topg,md.mesh.x,md.mesh.y,0);
-
-clear topg;
+% set mask
+%read thickness mask from SeaRISE
+x1=double(ncread(antarData,'x1'));
+y1=double(ncread(antarData,'y1'));
+thkmask=double(ncread(antarData,'mask'));
+thkmask(find(thkmask==0))=nan;
 
 %interpolate onto our mesh vertices
-groundedice=InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0);
+%groundedice=double(InterpFromGridToMesh(x1,y1,flipud(thkmask'),md.mesh.x,md.mesh.y,0));
+groundedice=double(InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0));
+%groundedice=InterpFromGridToMesh(x1,y1,thkmask,md.mesh.x,md.mesh.y,0);
 groundedice(groundedice>0)=1;
 groundedice(groundedice<=0)=-1;
 clear thkmask;
@@ -71,12 +74,11 @@ md.transient.isthermal=1;
 
 md.timestepping.time_step=10;
 %md.timestepping.start_time=100;
-md.settings.output_frequency=100;
-md.timestepping.final_time=100000;
+md.settings.output_frequency=10;
+md.timestepping.final_time=10000;
 %md.transient.requested_outputs={'default','IceVolume','IceVolumeAboveFloatation'};
 md.transient.requested_outputs={'default','IceVolume'};
 
-md.cluster=generic('name',oshostname,'np',28);
 md=solve(md,'Transient');
 
 % Save model

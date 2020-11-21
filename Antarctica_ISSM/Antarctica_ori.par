@@ -11,6 +11,10 @@ ncdata='./Antarctica.nc';
 monthlydata='./MonthlyData.nc'
 x1    = ncread(ncdata,'x1');
 y1    = ncread(ncdata,'y1');
+usrf  = ncread(ncdata,'usrf');
+usrf(find(usrf==0))=nan;
+topg  = ncread(ncdata,'topg');
+topg(find(topg==0))=nan;
 temp  = ncread(ncdata,'presartm');
 prcp  = ncread(ncdata,'prcp');
 monthlytemp = ncread(monthlydata,'presartm');
@@ -20,11 +24,13 @@ monthlyprcp = permute(monthlyprcp,[2 3 1]);
 
 %Geometry
 disp('   Interpolating surface and ice base');
-md.geometry.surface = md.geometry.base;
+md.geometry.base    = InterpFromGridToMesh(x1,y1,topg,md.mesh.x,md.mesh.y,0);
+md.geometry.surface = InterpFromGridToMesh(x1,y1,usrf,md.mesh.x,md.mesh.y,0);
 pos_float=find(md.geometry.base==0);
 % md.mask.groundedice_levelset(pos_float)=-1;
 % pos_lnd=find(md.geometry.base>0);
 % md.mask.groundedice_levelset(pos_lnd)=1;
+clear usrf, topg;
 
 % pos_low = [10046;10547;13046;13676];
 % md.geometry.base(pos_low) = 500;
