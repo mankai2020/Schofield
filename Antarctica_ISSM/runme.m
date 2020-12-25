@@ -1,7 +1,7 @@
 % create domain
 
-domain = ['./DomainOutline.exp'];
-%domain = ['./refinement.exp']
+% domain = ['./DomainOutline.exp'];
+domain = ['./coastline_10ma_100.exp'];
 hinit = 50000;
 hmax = 200000;
 hmin = 10000;
@@ -12,7 +12,7 @@ err = 8;
 md = bamg(model,'domain',domain,'hmax',hinit);
 
 % Load lndmask
-antarData = './Antarctica_new.nc';
+antarData = './Antarctica_new_10ma.nc';
 
 x1    = ncread(antarData,'x1');
 y1    = ncread(antarData,'y1');
@@ -46,23 +46,12 @@ md = parameterize(md,'./Antarctica.par');
 % Extrude
 md = extrude(md,3,1);
 
-% Use a MacAyeal flow model
-%md = setflowequation(md,'HO','all');
-md = setflowequation(md,'SSA','all');
-
-% Control
-% Cost functions
-% md.inversion.cost_functions=[101 103 501];
-% md.inversion.cost_functions_coefficients=ones(md.mesh.numberofvertices,3);
-% md.inversion.cost_functions_coefficients(:,1)=1;
-% md.inversion.cost_functions_coefficients(:,2)=1;
-% md.inversion.cost_functions_coefficients(:,3)=8e-15;
-% md.inversion.control_parameters={'FrictionCoefficient'};
-% md.inversion.min_parameters=1*ones(md.mesh.numberofvertices,1);
-% md.inversion.max_parameters=200*ones(md.mesh.numberofvertices,1);
+% Set flow equation
+md = setflowequation(md,'HO','all');
+% md = setflowequation(md,'SSA','all');
 
 % Transient Run
-md.inversion.iscontrol=0;
+md.inversion.iscontrol=1;
 md.transient.ismasstransport=1;
 md.transient.isstressbalance=1;
 md.transient.isgroundingline=0;
@@ -71,12 +60,11 @@ md.transient.isthermal=1;
 
 md.timestepping.time_step=10;
 %md.timestepping.start_time=100;
-md.settings.output_frequency=100;
-md.timestepping.final_time=100000;
-%md.transient.requested_outputs={'default','IceVolume','IceVolumeAboveFloatation'};
+md.settings.output_frequency=50;
+md.timestepping.final_time=50000;
 md.transient.requested_outputs={'default','IceVolume'};
 
-md.cluster=generic('name',oshostname,'np',28);
+md.cluster=generic('name',oshostname,'np',48);
 md=solve(md,'Transient');
 
 % Save model
